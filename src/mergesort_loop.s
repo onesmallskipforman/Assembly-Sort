@@ -11,22 +11,22 @@ main:
   B      END
 SORT:                   // R3 = array, R1 = n
   ADD    R5, R3, R1     // R5 = end = array + n
-  LSL    R6, R1, #1     // R6 = 2*n
-  MOV    R4, #2         // len = 2 (len is the length of double the half-arrays we're sorting)
+  MOV    R6, R1         // R6 = n
+  MOV    R4, #2         // len = 1 (max of the elements we are merging)
 L1:                     // len loop
-  CMP    R4, R6         // len >= 2*n ?
+  CMP    R4, R6         // len >= n ?
   BXGE   LR             // if so, return
   MOV    R0, R3         // R0 = l
-  LSR    R7, R4, #1     // R7 = len/2
+  LSL    R7, R4, #1     // R7 = len*2
 L2:                     // subarray merge loop
   CMP    R0, R5         // l >= end ?
   BGE    E2             // if so, end inner loop
-  ADD    R1, R0, R7     // R1 = l + len/2
-  CMP    R1, R5         // l + len/2 >= end ?
+  ADD    R1, R0, R6     // R1 = l + len
+  CMP    R1, R5         // l + len >= end ?
   MOVGE  R1, R5         // if so, use end
   SUB    R1, R1, #1     // R1 = m = R1 - 1
-  ADD    R2, R0, R4     // R2 = l + len
-  CMP    R2, R5         // l + len >= end ?
+  ADD    R2, R0, R7     // R2 = l + 2*len
+  CMP    R2, R5         // l + 2*len >= end ?
   MOVGE  R2, R5         // if so, use end
   SUB    R2, R2, #1     // R2 = r = R2 - 1
   BL     MERGE
@@ -76,7 +76,7 @@ LLOOP:                  // loop for unloading left array when right is finished
 MOVESTACK:              // move elements back into array
   CMP    R9, #0         // k == 0 ?
   ADDEQ  SP, SP, R6     // if so, deallocate stack space
-  POPEQ {R6, R7}
+  POPEQ  {R6, R7}
   BXEQ   LR             // and return to sorting
   SUB    R9, #1         // otherwise, k--
   ADD    R11, R0, R9    // x = k + l
