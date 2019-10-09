@@ -10,19 +10,18 @@ main:
   BL     SORT           // starting sorting algorithm on array2
   B      END
 SORT:                   // R3 = array, R1 = n
-  ADD    R5, R3, R1     // R5 = end = array + n - 1
-  SUB    R5, R5, #1
-  MOV    R6, R1         // R6 = n
-  MOV    R4, #2         // len = 2
+  ADD    R5, R3, R1     // R5 = end = array + n
+  LSL    R6, R1, #1     // R6 = 2*n
+  MOV    R4, #2         // len = 2 (len is the length of double the half-arrays we're sorting)
 L1:                     // len loop
-  CMP    R4, R6         // len >= n ?
+  CMP    R4, R6         // len >= 2*n ?
   BXGE   LR             // if so, return
   MOV    R0, R3         // R0 = l
-  LSR    R2, R1, #1     // R2 = len/2
+  LSR    R7, R4, #1     // R7 = len/2
 L2:                     // subarray merge loop
   CMP    R0, R5         // l >= end ?
   BGE    E2             // if so, end inner loop
-  ADD    R1, R0, R2     // R1 = l + len/2
+  ADD    R1, R0, R7     // R1 = l + len/2
   CMP    R1, R5         // l + len/2 >= end ?
   MOVGE  R1, R5         // if so, use end
   SUB    R1, R1, #1     // R1 = m = R1 - 1
@@ -37,6 +36,7 @@ E2:
   LSL    R4, R4, #1     // len *= 2
   B      L1
 MERGE:                  // merge function: R0 = l, R1 = m, R2 = r
+ PUSH    {R6, R7}
   SUB    R6, R2, R0     // R6 = r - l
   ADD    R6, R6, #1     // R6 = r - l + 1 = n
   SUB    SP, SP, R6     // make space on stack for r - l + 1 characters
@@ -76,6 +76,7 @@ LLOOP:                  // loop for unloading left array when right is finished
 MOVESTACK:              // move elements back into array
   CMP    R9, #0         // k == 0 ?
   ADDEQ  SP, SP, R6     // if so, deallocate stack space
+  POPEQ {R6, R7}
   BXEQ   LR             // and return to sorting
   SUB    R9, #1         // otherwise, k--
   ADD    R11, R0, R9    // x = k + l
