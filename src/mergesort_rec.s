@@ -2,17 +2,14 @@
 .global main
 main:
   MOV    R1, #12        // n = 12
-  LDR    R3, =array     // load base address of array into R3
-  MOV    R0, R3         // R0 = l
+  LDR    R0, =array     // load base address of array into R0
   BL     SORT           // start sorting algorithm on array
-  LDR    R3, =array1    // load base address of array into R3
-  MOV    R0, R3         // R0 = l
+  LDR    R0, =array1    // load base address of array into R0
   BL     SORT           // start sorting algorithm on array1
-  LDR    R3, =array2    // load base address of array into R3
-  MOV    R0, R3         // R0 = l
+  LDR    R0, =array2    // load base address of array into R0
   BL     SORT           // starting sorting algorithm on array2
   B      END
-SORT:                   // R3 = l, R1 = n
+SORT:                   // R0 = l, R1 = n
   CMP    R1, #1         // n =< 1?
   BXLE   LR             // if so, return
   PUSH   {LR}           // save preserved registers
@@ -32,7 +29,7 @@ SORT:                   // R3 = l, R1 = n
   BL     MERGE          // call merge function
   POP    {LR}           // restore preserved registers
   BX     LR             // return
-MERGE:                  // merge function: R0 = l, R1 = m, R2 = r, R3 = array
+MERGE:                  // merge function: R0 = l, R1 = m, R2 = r
   SUB    R6, R2, R0     // R6 = r - l
   ADD    R6, R6, #1     // R6 = r - l + 1 = n
   SUB    SP, SP, R6     // make space on stack for r - l + 1 characters
@@ -44,8 +41,8 @@ MERGELOOP:              // loop portion of merge function
   BGT    RLOOP          // if so, branch to loop for unloading right data
   CMP    R8, R2         // j > r ?
   BGT    LLOOP          // if so, branch to loop for unloading left data
-  LDRSB  R10, [R7]      // R10 = array[i]
-  LDRSB  R11, [R8]      // R11 = array[j]
+  LDRSB  R10, [R7]      // R10 = mem[i]
+  LDRSB  R11, [R8]      // R11 = mem[j]
   CMP    R10, R11       // R10 >= R11 ?
   MOVGE  R10, R11       // if so, use value in R11
   STRB   R10, [SP, R9]  // starray[k] = R10
@@ -56,7 +53,7 @@ MERGELOOP:              // loop portion of merge function
 RLOOP:                  // loop for unloading right array when left is finished
   CMP    R8, R2         // j > r ?
   BGT    MOVESTACK      // if so, branch to array replacement function
-  LDRSB  R11, [R8]      // R11 = array[j]
+  LDRSB  R11, [R8]      // R11 = mem[j]
   STRB   R11, [SP, R9]  // starray[k] = R11
   ADD    R8, #1         // j++
   ADD    R9, #1         // k++
@@ -64,7 +61,7 @@ RLOOP:                  // loop for unloading right array when left is finished
 LLOOP:                  // loop for unloading left array when right is finished
   CMP    R7, R1         // i > m ?
   BGT    MOVESTACK      // if so, branch to array replacement function
-  LDRSB  R10, [R7]      // R10 = array[i]
+  LDRSB  R10, [R7]      // R10 = mem[i]
   STRB   R10, [SP, R9]  // starray[k] = R10
   ADD    R7, #1         // i++
   ADD    R9, #1         // k++
@@ -76,7 +73,7 @@ MOVESTACK:              // move elements back into array
   SUB    R9, #1         // otherwise, k--
   ADD    R11, R0, R9    // x = k + l
   LDRSB  R10, [SP, R9]  // R10 = starray[k]
-  STRB   R10, [R11]     // array[x] = R10
+  STRB   R10, [R11]     // mem[x] = R10
   B      MOVESTACK
 END:
   NOP                   // dummy instruction for breakpoint
