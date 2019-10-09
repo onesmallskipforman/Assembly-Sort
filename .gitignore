@@ -6,4 +6,5 @@
 # ignore extensionless, system-dependent executables
 *
 !*.*
+!*makefile*
 !*/
