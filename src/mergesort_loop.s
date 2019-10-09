@@ -1,27 +1,31 @@
 .text
 .global main
 main:
-  MOV    R1, #12        // n = 12
   LDR    R3, =array     // load base address of array into R0
+  MOV    R1, #12        // n = 12
   BL     SORT           // start sorting algorithm on array
   LDR    R3, =array1    // load base address of array into R0
+  MOV    R1, #12        // n = 12
   BL     SORT           // start sorting algorithm on array1
   LDR    R3, =array2    // load base address of array into R0
+  MOV    R1, #12        // n = 12
   BL     SORT           // starting sorting algorithm on array2
   B      END
 SORT:                   // R3 = array, R1 = n
+  PUSH   {LR}           // save preserved registers
   ADD    R5, R3, R1     // R5 = end = array + n
   MOV    R6, R1         // R6 = n
-  MOV    R4, #2         // len = 1 (max of the elements we are merging)
+  MOV    R4, #1         // len = 1 (max of the elements we are merging)
 L1:                     // len loop
   CMP    R4, R6         // len >= n ?
-  BXGE   LR             // if so, return
+  POPGE  {LR}           // if so, restore preserved registers
+  BXGE   LR             // also return
   MOV    R0, R3         // R0 = l
   LSL    R7, R4, #1     // R7 = len*2
 L2:                     // subarray merge loop
   CMP    R0, R5         // l >= end ?
   BGE    E2             // if so, end inner loop
-  ADD    R1, R0, R6     // R1 = l + len
+  ADD    R1, R0, R4     // R1 = l + len
   CMP    R1, R5         // l + len >= end ?
   MOVGE  R1, R5         // if so, use end
   SUB    R1, R1, #1     // R1 = m = R1 - 1
@@ -30,7 +34,7 @@ L2:                     // subarray merge loop
   MOVGE  R2, R5         // if so, use end
   SUB    R2, R2, #1     // R2 = r = R2 - 1
   BL     MERGE
-  ADD    R0, R0, R4     // l += len
+  ADD    R0, R0, R7     // l += 2*len
   B      L2
 E2:
   LSL    R4, R4, #1     // len *= 2
@@ -84,7 +88,6 @@ MOVESTACK:              // move elements back into array
   STRB   R10, [R11]     // mem[x] = R10
   B      MOVESTACK
 END:
-  NOP                   // dummy instruction for breakpoint
 .data
 array:
   .byte 0x42 // 23
