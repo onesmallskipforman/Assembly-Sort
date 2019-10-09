@@ -1,2 +1,2 @@
-sort: src/bubblesort.s
-	gcc -g -o sort src/bubblesort.s
+sort: src/mergesort_rec.s
+	gcc -g -o sort src/mergesort_rec.s
